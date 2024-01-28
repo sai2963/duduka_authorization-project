@@ -19,8 +19,8 @@ router.get("/welcome", (req, res) => {
   res.render("welcome");
 });
 router.get("/admin", (req, res) => {
-  if(!req.session.isAuthenticated){
-    return res.status(401).send('Authentication Denied')
+  if (!req.session.isAuthenticated) {
+    return res.status(401).send("Authentication Denied");
   }
   res.render("admin");
 });
@@ -29,9 +29,9 @@ router.post("/signup", async (req, res) => {
   const useremail = userdata.email;
   const confirmuseremail = userdata["comfirm-email"];
   const userpassword = userdata.inputPassword;
-  const enteredpassword=userpassword.trim();
+  const enteredpassword = userpassword.trim();
   const hashedPassword = await bcrypt.hash(userpassword, 12);
-console.log(hashedPassword)
+  console.log(hashedPassword);
   // if (
   //   !useremail ||
   //   !confirmuseremail ||
@@ -44,7 +44,6 @@ console.log(hashedPassword)
   //   return res.redirect("/signup");
   // }
 
-  
   const existinguser = await db
     .getDb()
     .collection("users")
@@ -55,7 +54,6 @@ console.log(hashedPassword)
     return res.redirect("/signup");
   }
 
-  
   const user = {
     email: useremail,
     password: hashedPassword,
@@ -65,8 +63,9 @@ console.log(hashedPassword)
   res.redirect("/login");
 });
 
-router.post("/login", async (req, res) => {
-  
+router.post(
+  "/login",
+  async (req, res) => {
     const userdata = req.body;
     const useremail = userdata.email;
     const userpassword = userdata.inputPassword;
@@ -90,21 +89,17 @@ router.post("/login", async (req, res) => {
       console.log("Password incorrect");
       return res.redirect("/login");
     }
-    req.session.user = { id:existinguser._id,email:existinguser.email};
-    req.session.isAuthenticated=true;
-    req.session.save(function(){
-      res.redirect('/admin')
-    })
+    req.session.user = { id: existinguser._id, email: existinguser.email };
+    req.session.isAuthenticated = true;
+    req.session.save(function () {
+      res.redirect("/admin");
+    });
     console.log("User Authenticated");
     //res.redirect("/admin");
-  
-  }  //  catch (error) {
+  } //  catch (error) {
   //   console.error("Error during login:", error);
   //   res.redirect("/login");
   // }
-
-
 );
-
 
 module.exports = router;

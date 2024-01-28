@@ -11,15 +11,19 @@ const router=require('./routes/route');
 const db=require('./data/database')
 const bodyParser = require('body-parser');
 //app.use(express.static('public'));
-app.use(router)
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(session({
     secret:'super-secret',
     resave:false,
     saveUninitialized:false,
-    store:sessionStore
+    store:sessionStore,
+    cookie:{
+        maxAge:30*24*60*60*1000
+    }
 }));
+app.use(router)
 app.set('view engine', 'ejs')
 app.get('/',(req,res)=>{
     res.redirect('login')
