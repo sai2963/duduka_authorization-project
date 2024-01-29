@@ -13,36 +13,63 @@ router.get("/login", (req, res) => {
   res.render("login");
 });
 router.get("/signup", (req, res) => {
-  res.render("signup");
+  let sessiondata = req.session.inputData;
+  if (!sessiondata) {
+    sessiondata = {
+      hasError: false,
+      email: "",
+      confirmemail: "",
+      password: '',
+    };
+  }
+  req.session.inputData = null;
+  res.render("signup", { inputData: sessiondata });
 });
 router.get("/welcome", (req, res) => {
   res.render("welcome");
 });
-router.get("/admin", (req, res) => {
+router.get("/admin", async (req, res) => {
   if (!req.session.isAuthenticated) {
     return res.status(401).send("Authentication Denied");
   }
+  const user = await db.getDb().collection('users').findOne({_id:req.session.user.id});
+  if(!user||!user.isAdmin){
+    res.send('Authenticated but not authorized')
+  }
   res.render("admin");
+});
+router.get("/profile", (req, res) => {
+  if (!req.session.isAuthenticated) {
+    return res.status(401).send("Authentication Denied");
+  }
+  res.render("profile");
 });
 router.post("/signup", async (req, res) => {
   const userdata = req.body;
   const useremail = userdata.email;
-  const confirmuseremail = userdata["comfirm-email"];
+  const confirmuseremail = userdata["confirm=email"];
+  console.log(confirmuseremail);
   const userpassword = userdata.inputPassword;
   const enteredpassword = userpassword.trim();
   const hashedPassword = await bcrypt.hash(userpassword, 12);
   console.log(hashedPassword);
-  // if (
-  //   !useremail ||
-  //   !confirmuseremail ||
-  //   !userpassword ||
-  //   //useremail !== confirmuseremail||
-  //  enteredpassword.length() < 8 ||
-  //   !useremail.includes("@")
-  // ) {
-  //   console.log("Incorrect Details");
-  //   return res.redirect("/signup");
-  // }
+  if (
+    !useremail ||
+    !confirmuseremail ||
+    !userpassword ||
+    useremail !== confirmuseremail ||
+    enteredpassword.length < 8 ||
+    !useremail.includes("@")
+  ) {
+    req.session.inputData = {
+      hasError: true,
+      message: "Invalid input -please check your data",
+      email: useremail,
+      confirmemail: confirmuseremail,
+      password: enteredpassword,
+    };
+    return res.redirect("/signup");
+  }
 
   const existinguser = await db
     .getDb()
@@ -92,7 +119,7 @@ router.post(
     req.session.user = { id: existinguser._id, email: existinguser.email };
     req.session.isAuthenticated = true;
     req.session.save(function () {
-      res.redirect("/admin");
+      res.redirect("/profile");
     });
     console.log("User Authenticated");
     //res.redirect("/admin");
@@ -101,5 +128,11 @@ router.post(
   //   res.redirect("/login");
   // }
 );
+router.post("/logout", (req, res) => {
+  req.session.user = null;
+  req.session.isAuthenticated = false;
+
+  res.redirect("/login");
+});
 
 module.exports = router;

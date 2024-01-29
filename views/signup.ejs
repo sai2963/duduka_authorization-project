@@ -20,26 +20,36 @@
         <li class="nav-item">
           <a class="nav-link active" aria-current="page" href="admin">Admin</a>
         </li>
-        
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="profile">Profile</a>
+        </li>
+        <li>
+          <form action="/logout" method="post">
+              <button class="nav-link active" type="submit" >Logout</button>
+          </form>
+      </li>
       </ul>
+      <% if(inputData.hasError){%>
+        <p id="input-error"><%= inputData.message %> </p>
+      <%}%>
       <form action="/signup" method="post">
         <div class="container">
             <div class="mb-3 row">
                 <label for="email" class="col-sm-2 col-form-label" required >Email</label>
                 <div class="col-sm-10">
-                  <input type="email"  class="form-control-plaintext"  name="email" id="email" value="email@example.com">
+                  <input type="email"  class="form-control-plaintext"  name="email" id="email" value="<%= inputData.email %>">
                 </div>
               </div>
             <div class="mb-3 row">
                 <label for="confirm=email" class="col-sm-2 col-form-label" required>Confirm-Email</label>
                 <div class="col-sm-10">
-                  <input type="email"  class="form-control-plaintext" name="confirm=email" id="confirm=email" value="email@example.com">
+                  <input type="email"  class="form-control-plaintext" name="confirm=email" id="confirm=email" value="<%= inputData.confirmemail %>">
                 </div>
               </div>
               <div class="mb-3 row">
                 <label for="inputPassword" class="col-sm-2 col-form-label">Password</label>
                 <div class="col-sm-10">
-                  <input type="password" class="form-control" id="inputPassword" required name="inputPassword">
+                  <input type="password" class="form-control" id="inputPassword" required name="inputPassword" value=""<%= inputData.password %>>
                 </div>
               </div>
               <button class="btn btn-success" type="submit">Signin</button>
